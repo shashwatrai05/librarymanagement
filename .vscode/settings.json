@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "date_management.h": "c",
+        "member_management.h": "c"
+    }
+}
