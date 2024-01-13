@@ -24,6 +24,6 @@ void issueBook();
 void returnBook();
 void adminBookCirculation();
 void userBookCirculation();
-
+void saveCatalogToFile(const char* filename);
 
 #endif
