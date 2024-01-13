@@ -5,7 +5,7 @@
 #include "search_and_browse.h"
 #include "book_circulation.h"
 
-// Function to search for books by author's name
+
 void searchByAuthor(const char authorName[], struct BookNode* catalogHead) {
     printf("Books by Author: %s\n", authorName);
 
@@ -13,52 +13,51 @@ void searchByAuthor(const char authorName[], struct BookNode* catalogHead) {
 
     while (current != NULL) {
         if (strcmp(current->book.author, authorName) == 0) {
-            // Print the book's details
+           
             printf("Title: %s\n", current->book.title);
             printf("Author: %s\n", current->book.author);
             printf("ISBN: %d\n", current->book.ISBN);
 
-            // Check if the book is in circulation
+
             if (current->book.availability == 0) {
                 printf("Book is available for circulation.\n");
             } else {
                 printf("Book is not available for circulation.\n");
             }
-            printf("\n"); // Add a newline for better readability
+            printf("\n"); 
         }
 
         current = current->next;
     }
 }
 
-// Function to search for books by title
+
 void searchByTitle(const char titleName[], struct BookNode* catalogHead) {
     printf("Books with Title: %s\n", titleName);
 
     struct BookNode* current = catalogHead;
 
     while (current != NULL) {
-        // Check if the input title is a substring of the actual title
+       
         if (strstr(current->book.title, titleName) != NULL) {
             // Print the book's details
             printf("Title: %s\n", current->book.title);
             printf("Author: %s\n", current->book.author);
             printf("ISBN: %d\n", current->book.ISBN);
 
-            // Check if the book is in circulation
             if (current->book.availability == 0) {
                 printf("Book is available for circulation.\n");
             } else {
                 printf("Book is not available for circulation.\n");
             }
-            printf("\n"); // Add a newline for better readability
+            printf("\n"); 
         }
 
         current = current->next;
     }
 }
 
-// Function to search and browse books
+
 void searchAndBrowse() {
     int choice;
 

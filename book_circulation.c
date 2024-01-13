@@ -6,6 +6,8 @@
 
 struct BookNode* catalogHead = NULL;
 
+
+
 // void freeBookList(struct BookNode** head) {
 //     struct BookNode* current = *head;
 //     struct BookNode* next;
@@ -19,7 +21,6 @@ struct BookNode* catalogHead = NULL;
 //     *head = NULL;
 // }
 
-// Function to add a book to the catalog
 void addBook() {
     printf("Enter book details:\n");
 
@@ -35,14 +36,13 @@ void addBook() {
     scanf("%s", newBookNode->book.author);
     printf("ISBN: ");
     scanf("%d", &newBookNode->book.ISBN);
-    newBookNode->book.availability = 1; // Mark the book as available
-    newBookNode->next = catalogHead; // Add to the beginning of the list
+    newBookNode->book.availability = 1; 
+    newBookNode->next = catalogHead;
     catalogHead = newBookNode;
 
     printf("Book added to the catalog.\n");
 }
 
-// Function to delete a book from the catalog
 void deleteBook() {
     int ISBN;
 
@@ -77,7 +77,68 @@ void deleteBook() {
     }
 }
 
-// Function to manage book circulation for admin
+
+void issueBook() {
+    int ISBN;
+
+    printf("Enter the ISBN of the book to issue: ");
+    scanf("%d", &ISBN);
+
+    struct BookNode* current = catalogHead;
+    int found = 0;
+
+    while (current != NULL) {
+        if (current->book.ISBN == ISBN) {
+            if (current->book.availability == 1) {
+                current->book.availability = 0;  // Set book as unavailable
+                printf("Book issued successfully.\n");
+            } else {
+                printf("Book is not available for issue.\n");
+            }
+
+            found = 1;
+            break;
+        }
+
+        current = current->next;
+    }
+
+    if (!found) {
+        printf("Book not found in the catalog.\n");
+    }
+}
+
+void returnBook() {
+    int ISBN;
+
+    printf("Enter the ISBN of the book to return: ");
+    scanf("%d", &ISBN);
+
+    struct BookNode* current = catalogHead;
+    int found = 0;
+
+    while (current != NULL) {
+        if (current->book.ISBN == ISBN) {
+            if (current->book.availability == 0) {
+                current->book.availability = 1;  // Set book as available
+                printf("Book returned successfully.\n");
+            } else {
+                printf("Invalid operation. The book is not issued.\n");
+            }
+
+            found = 1;
+            break;
+        }
+
+        current = current->next;
+    }
+
+    if (!found) {
+        printf("Book not found in the catalog.\n");
+    }
+}
+
+
 void adminBookCirculation() {
     int choice;
 
@@ -105,19 +166,25 @@ void adminBookCirculation() {
     } while (choice != 0);
 }
 
-// Function to manage book circulation for user
+
 void userBookCirculation() {
     int choice;
 
     do {
         printf("Catalog Management (User):\n");
-        printf("1. Add a book (Not available)\n");
-        printf("2. Delete a book (Not available)\n");
+        printf("1. Issue a book\n");
+        printf("2. Return a book\n");
         printf("0. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
         switch (choice) {
+            case 1:
+                issueBook();
+                break;
+            case 2:
+                returnBook();
+                break;
             case 0:
                 printf("Returning to the main menu.\n");
                 break;

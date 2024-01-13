@@ -12,7 +12,7 @@ struct Book* catalog = NULL;
 int catalogSize = 0;
 
 struct User* users = NULL;
-int userCount = 0;
+int userCount=0;
 
 #define ADMIN_USERNAME "admin"
 #define ADMIN_PASSWORD "admin123"
@@ -22,7 +22,18 @@ void adminBookCirculation();
 void searchAndBrowse();
 void dateManagement(struct Book* catalog, int catalogSize);
 
-// Function to display the login menu
+int countUsers(struct User* userList) {
+    int count = 0;
+    struct User* current = userList;
+
+    while (current != NULL) {
+        count++;
+        current = current->next;
+    }
+
+    return count;
+}
+
 int displayLoginMenu() {
     int choice;
     printf("Login Menu:\n");
@@ -31,12 +42,76 @@ int displayLoginMenu() {
     printf("\t 0. Exit\n");
     printf("Enter your choice: ");
     scanf("%d", &choice);
-    return choice;
+
+    // Return the user type based on successful login
+    if (choice == 1) {
+        char inputUsername[100];
+        char inputPassword[100];
+
+        printf("Enter Admin username: ");
+        scanf("%s", inputUsername);
+
+        printf("Enter Admin password: ");
+        scanf("%s", inputPassword);
+
+        if (strcmp(inputUsername, ADMIN_USERNAME) == 0 && strcmp(inputPassword, ADMIN_PASSWORD) == 0) {
+            printf("Admin login successful.\n");
+            return 0; // Admin user type
+        } else {
+            printf("Admin login failed. Invalid username or password.\n");
+        }
+    } else if (choice == 2) {
+        users = readUsersFromFile();  // Read users from the file
+        userCount = countUsers(users); // Update userCount
+
+        if (userCount == 0) {
+            printf("No users available. Please contact the administrator.\n");
+            return -1; // Login failed
+        }
+
+        char inputUsername[100];
+        char inputPassword[100];
+        int loggedIn = 0;
+
+        do {
+            printf("Enter User username: ");
+            scanf("%s", inputUsername);
+
+            printf("Enter User password: ");
+            scanf("%s", inputPassword);
+
+            int userIndex;
+            for (userIndex = 0; userIndex < userCount; userIndex++) {
+                if (strcmp(users[userIndex].username, inputUsername) == 0 && strcmp(users[userIndex].password, inputPassword) == 0) {
+                    printf("User login successful. Welcome, %s!\n", users[userIndex].username);
+                    loggedIn = 1;
+                    break;
+                }
+            }
+
+            if (!loggedIn) {
+                printf("User login failed. Invalid username or password. Please try again.\n");
+            }
+        } while (!loggedIn);
+
+        // Free the memory allocated for the user list after the loop
+        freeUserList(users);
+
+        return 1; // Regular user type
+    }
+
+    return -1; // Login failed
 }
+
+
 
 int main() {
     int choice;
     int userType = -1;
+
+    // Assuming users array is correctly initialized before calling displayLoginMenu
+    // Initialize the users array for testing
+    users = readUsersFromFile();  // This should read the users from the file
 
     do {
         system("clear || cls");
@@ -55,64 +130,19 @@ int main() {
         choice = displayLoginMenu();
 
         switch (choice) {
-            case 1:
-                {
-                    char inputUsername[100];
-                    char inputPassword[100];
-
-                    printf("Enter Admin username: ");
-                    scanf("%s", inputUsername);
-
-                    printf("Enter Admin password: ");
-                    scanf("%s", inputPassword);
-
-                    if (strcmp(inputUsername, ADMIN_USERNAME) == 0 && strcmp(inputPassword, ADMIN_PASSWORD) == 0) {
-                        userType = 0;
-                    } else {
-                        printf("Admin login failed. Invalid username or password.\n");
-                    }
-
-                    if (userType == 0) {
-                        printf("Admin login successful.\n");
-                    }
-                }
-                break;
-            case 2:
-                {
-                    char inputUsername[100];
-                    char inputPassword[100];
-
-                    printf("Enter User username: ");
-                    scanf("%s", inputUsername);
-
-                    printf("Enter User password: ");
-                    scanf("%s", inputPassword);
-
-                    int userIndex;
-                    for (userIndex = 0; userIndex < userCount; userIndex++) {
-                        if (strcmp(users[userIndex].username, inputUsername) == 0 && strcmp(users[userIndex].password, inputPassword) == 0) {
-                            userType = 1;
-                            break;
-                        }
-                    }
-
-                    if (userIndex == userCount) {
-                        printf("User login failed. Invalid username or password.\n");
-                    }
-
-                    if (userType == 1) {
-                        printf("User login successful. Welcome, %s!\n", users[userIndex].username);
-                    }
-                }
-                break;
             case 0:
-                printf("\nGoodbye! Exiting the program.\n");
+                userType = 0; // Admin user type
                 break;
+            case 1:
+                userType = 1; // Regular user type
+                break;
+            case -1:
+                return 0; // Exit the program if login fails
             default:
                 printf("\nInvalid choice. Please try again.\n");
                 break;
         }
-    } while (userType == -1 && choice != 0);
+    } while (userType == -1);
 
     if (userType != -1) {
         do {
@@ -137,7 +167,7 @@ int main() {
             printf("\t 4. Date Management\n");
             printf("\x1B[0m");
             printf("\t 0. Exit\n");
-            printf("\t 99. Back to Login\n");  // Added option to go back to login
+            printf("\t 99. Back to Login\n");
             printf("Enter your choice: ");
             scanf("%d", &choice);
 
@@ -188,7 +218,6 @@ int main() {
         } while (choice != 0 && userType != -1);
     }
 
-    // Free memory used by linked lists before exiting
     //freeBookList(&catalog);
     //freeUserList(&users);
 

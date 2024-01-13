@@ -7,7 +7,7 @@
 
 struct DateNode* dateList = NULL;
 
-// Function to add a date to the date list
+
 void addDate(struct Date date) {
     struct DateNode* newDateNode = (struct DateNode*)malloc(sizeof(struct DateNode));
     if (newDateNode == NULL) {
@@ -20,7 +20,6 @@ void addDate(struct Date date) {
     dateList = newDateNode;
 }
 
-// Function to calculate the due date based on the checkout date
 void dueDate(struct Date issueDate) {
     struct tm tm_issueDate = {.tm_year = issueDate.year - 1900,
                               .tm_mon = issueDate.month - 1,
@@ -32,11 +31,11 @@ void dueDate(struct Date issueDate) {
     struct tm* tm_dueDate = localtime(&t_dueDate);
     printf("Due Date: %02d/%02d/%04d\n", tm_dueDate->tm_mday, tm_dueDate->tm_mon + 1, tm_dueDate->tm_year + 1900);
 
-    // Add the due date to the date list
+   
     addDate(issueDate);
 }
 
-// Function to calculate and update late fines
+
 void lateFine(struct Date returnDate, struct Date issueDate) {
     struct tm tm_returnDate = {.tm_year = returnDate.year - 1900,
                                 .tm_mon = returnDate.month - 1,
@@ -58,7 +57,6 @@ void lateFine(struct Date returnDate, struct Date issueDate) {
     }
 }
 
-// Function to manage dates for a given book
 void dateManagement(struct Book* catalog, int catalogSize) {
     struct Date issueDate;
     struct Date returnDate;

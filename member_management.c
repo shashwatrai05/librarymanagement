@@ -5,21 +5,6 @@
 #include <string.h>
 #include "member_management.h"
 
-// void freeUserList(struct User** head) {
-//     struct User* current = *head;
-//     struct User* next;
-
-//     while (current != NULL) {
-//         next = current->next;
-//         free(current);
-//         current = next;
-//     }
-
-//     *head = NULL;  // Set the head to NULL after freeing all nodes
-// }
-
-
-// Function to add a user
 void addUser(struct User** userList) {
     printf("Enter new user details:\n");
 
@@ -38,10 +23,79 @@ void addUser(struct User** userList) {
     newUser->next = *userList;
     *userList = newUser;
 
-    printf("User added successfully.\n");
+    FILE* file = fopen("user_data.txt", "a");
+    if (file != NULL) {
+        fprintf(file, "%s %s\n", newUser->username, newUser->password);
+        fclose(file);
+        printf("User added successfully.\n");
+    } else {
+        printf("Unable to open file for writing.\n");
+    }
 }
 
-// Function to delete a user
+struct User* readUsersFromFile() {
+    FILE* file = fopen("user_data.txt", "r");
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        return NULL;
+    }
+
+    // Initialize variables
+    char line[256];
+    struct User* userList = NULL;
+    struct User* tail = NULL;
+
+    // Read lines from the file
+    while (fgets(line, sizeof(line), file) != NULL) {
+        // Parse the line into username and password
+        char username[100];
+        char password[100];
+        if (sscanf(line, "%s %s", username, password) == 2) {
+            // Create a new user node
+            struct User* newUser = (struct User*)malloc(sizeof(struct User));
+            if (newUser == NULL) {
+                perror("Memory allocation failed");
+                fclose(file);
+                freeUserList(userList);  // Free the memory allocated so far
+                return NULL;
+            }
+
+            // Copy username and password to the new user node
+            strcpy(newUser->username, username);
+            strcpy(newUser->password, password);
+            newUser->next = NULL;
+
+            // Append the new user node to the user list
+            if (userList == NULL) {
+                userList = newUser;
+                tail = newUser;
+            } else {
+                tail->next = newUser;
+                tail = newUser;
+            }
+        }
+    }
+
+    fclose(file);
+
+    return userList;
+}
+
+
+void writeUsersToFile(struct User* userList) {
+    FILE* file = fopen("user_data.txt", "w");
+    if (file != NULL) {
+        struct User* current = userList;
+        while (current != NULL) {
+            fprintf(file, "%s %s\n", current->username, current->password);
+            current = current->next;
+        }
+        fclose(file);
+    } else {
+        printf("Unable to open file for writing.\n");
+    }
+}
+
 void deleteUser(struct User** userList) {
     if (*userList == NULL) {
         printf("No users to delete.\n");
@@ -75,7 +129,6 @@ void deleteUser(struct User** userList) {
     printf("User not found.\n");
 }
 
-// Function for user login
 int login(struct User* userList) {
     if (userList == NULL) {
         printf("No users available for login.\n");
@@ -90,7 +143,6 @@ int login(struct User* userList) {
     char inputPassword[100];
     scanf("%s", inputPassword);
 
-    // Check if the entered credentials match any user
     int index = 1;
     struct User* current = userList;
     while (current != NULL) {
@@ -106,7 +158,6 @@ int login(struct User* userList) {
     return -1; // Login failed
 }
 
-// Function to display all users
 void displayUsers(struct User* userList) {
     if (userList == NULL) {
         printf("No users to display.\n");
@@ -122,7 +173,6 @@ void displayUsers(struct User* userList) {
     }
 }
 
-// Function to free the memory used by the user list
 void freeUserList(struct User* userList) {
     struct User* current = userList;
     struct User* next;
@@ -134,9 +184,9 @@ void freeUserList(struct User* userList) {
     }
 }
 
-// Function for member management menu
-void memberManagement() {
-    struct User* userList = NULL;  // Initialize an empty linked list
+void memberManagement(struct User** userList) {
+
+    struct User* usersFromFile = readUsersFromFile();
 
     int choice;
 
@@ -152,13 +202,13 @@ void memberManagement() {
 
         switch (choice) {
             case 1:
-                addUser(&userList);
+                addUser(userList);
                 break;
             case 2:
-                deleteUser(&userList);
+                deleteUser(userList);
                 break;
             case 3:
-                displayUsers(userList);
+                displayUsers(usersFromFile);  // Display users read from file
                 break;
             case 0:
                 printf("Returning to the main menu.\n");
@@ -168,6 +218,7 @@ void memberManagement() {
         }
     } while (choice != 0);
 
-    // Free the memory used by the user list before exiting
-    //freeUserList(userList);
+
+    writeUsersToFile(*userList);
+    freeUserList(usersFromFile);
 }
